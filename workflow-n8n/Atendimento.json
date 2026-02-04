@@ -1,0 +1,931 @@
+{
+  "name": "Atendimento Simples Demo - 01",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "aula",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -160,
+        496
+      ],
+      "id": "0902315c-b2f5-4c42-a872-fc883c9c8584",
+      "name": "Webhook",
+      "webhookId": "d4e12259-1ef4-49e0-9a13-0ded98a1ead5"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        352,
+        608
+      ],
+      "id": "4f00b2f3-c0e6-4fc4-9f2d-111fb5702799",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "79c3f795-d66b-488d-a63f-e264f44778d0",
+              "name": "=message.id",
+              "value": "={{ $('Webhook').item.json.body.data.key.id }}",
+              "type": "string"
+            },
+            {
+              "id": "e831bf4c-88bd-4a04-91be-b738753d0485",
+              "name": "message.from",
+              "value": "={{ $('Webhook').item.json.body.data.key.remoteJid }}",
+              "type": "string"
+            },
+            {
+              "id": "ec420a5e-1820-4e07-9f0c-d452c4f11004",
+              "name": "message.content",
+              "value": "={{ $('Webhook').item.json.body.data.message.conversation }}",
+              "type": "string"
+            },
+            {
+              "id": "adbbdcc1-1ec4-4d56-944c-221304112ac2",
+              "name": "message.timestamp",
+              "value": "={{ $('Webhook').item.json.body.date_time }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        352,
+        416
+      ],
+      "id": "b81a45fd-f1c8-4e2e-b9b3-742914a2bce7",
+      "name": "Normalização"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $json.message.from }}",
+        "messageData": "={{ JSON.stringify($json.message) }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        576,
+        416
+      ],
+      "id": "70fad892-8150-44e0-aaea-a001a88b31fd",
+      "name": "Publicar Mensagem",
+      "credentials": {
+        "redis": {
+          "id": "aDjsZnjItgbFsiKQ",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "Messages",
+        "key": "={{ $('Normalização').item.json.message.from }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        960,
+        400
+      ],
+      "id": "15472042-5c58-41ce-88db-01b4eb4f9daa",
+      "name": "Obter Mensagens",
+      "credentials": {
+        "redis": {
+          "id": "aDjsZnjItgbFsiKQ",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Normalização').item.json.message.from }}_memory",
+        "sessionTTL": 7200,
+        "contextWindowLength": 150
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        1984,
+        608
+      ],
+      "id": "8526bcc9-73d3-4035-a368-d51170402b45",
+      "name": "Redis Chat Memory",
+      "credentials": {
+        "redis": {
+          "id": "aDjsZnjItgbFsiKQ",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2960,
+        416
+      ],
+      "id": "ff64f6ae-0f40-44e7-8aab-0adebc929415",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3536,
+        288
+      ],
+      "id": "bdd2afc8-e19b-4749-861e-c4bc87dc3597",
+      "name": "Encerrar envio"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 608,
+        "width": 752,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "60e64518-4de3-4e9a-a655-06bdea72b098",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 608,
+        "width": 912,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        768,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "f55e0bf6-c78d-4440-b830-c41b6858853a",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 608,
+        "width": 592,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1696,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "fd86d4fc-736b-4f0c-9e7b-efd18b9270e1",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Hoje é {{ $now.format(\"DD - HH:mm\") }}.\n\nWhatsApp do cliente: {{ $('Normalização').item.json.message.from }}\n\nConteúdo da mensagem: {{ $json.Messages }}.",
+        "options": {
+          "systemMessage": "=Hoje é {{ $now.format(\"DD - HH:mm\") }}\n\nVocê é o Blue, um assistente virtual muito educado e cordial, criado pelo War Finance. Sempre responda às perguntas de forma gentil, respeitosa e amigável. Use um tom positivo e prestativo, mesmo se não souber a resposta. Evite respostas rudes, curtas ou impacientes."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        1888,
+        416
+      ],
+      "id": "2527c169-44f0-4b54-857e-c2db1bb5c9a4",
+      "name": "Agente Blue"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f58f99da-4aae-4769-8194-e46f3fe6d618",
+              "name": "Messages",
+              "value": "={{ $json.Messages.map(value => JSON.parse(value).content).join('\\n') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1392,
+        368
+      ],
+      "id": "1055094c-5873-47a9-bec2-c371f6445fe2",
+      "name": "Juntar Mensagens"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Normalização').item.json.message.from }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        2400,
+        416
+      ],
+      "id": "ceae9631-e39a-44d6-9706-a15ca91d175e",
+      "name": "Delete Buffer",
+      "credentials": {
+        "redis": {
+          "id": "aDjsZnjItgbFsiKQ",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Processamento das Mensagens.\n- Espera de 5s: Aguarda brevemente para detectar pausas nas mensagens.\n- Verificação de pausa: Checa se o usuário parou de enviar mensagens.\n- Agrupamento: Junta as mensagens da fila para enviar à IA.",
+        "height": 576,
+        "width": 880,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        784,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "0da6dd9e-281e-48e3-91bd-fe7befb5eca3",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Envio das Mensagens para a IA.\n- Agente genérico: Processa o conteúdo da mensagem.\n- LLM flexível: Suporta qualquer provedor compatível (OpenAI, Gemini, OpenRouter, etc.).\n- Memória rápida: Redis armazena o contexto da IA temporariamente.",
+        "height": 576,
+        "width": 560,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1712,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "29f5dad7-e4ff-4e57-b019-36dacc363425",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## Buffer das Mensagens\n- Verificação de remetente (modo teste): Garante que apenas um número autorizado dispare o fluxo (Remover em produção).\n- Criação de variáveis: Prepara os dados necessário para uso no fluxo.\n- Publicação na fila: Envia os dados para processamento assíncrono.",
+        "height": 576,
+        "width": 720,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        16,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "fec67daa-17c2-4308-8a48-68cefe8dc0d6",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Split out da Resposta.\n- Limpeza da fila: Remove as mensagens já processadas do cliente.\n- Divisão da resposta: Quebra a resposta da IA em partes menores para envio.",
+        "height": 576,
+        "width": 576,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2320,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "dba647fa-11de-47b7-bd21-fa45a0626dea",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5af80345-fd42-447f-a182-9737efacf1cf",
+              "leftValue": "={{ JSON.parse($json.Messages[$json.Messages.length - 1]).id }}",
+              "rightValue": "={{ $('Normalização').item.json.message.id }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1152,
+        400
+      ],
+      "id": "56eeca6c-6c96-433f-88e0-44d035ac2e34",
+      "name": "Verificar se usuário parou de digitar"
+    },
+    {
+      "parameters": {},
+      "id": "c243ef23-4268-47a3-84b3-526227bf6cd2",
+      "name": "Usuário ainda está digitando, parar o fluxo",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1392,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Envio da Resposta.\n- Loop de envio: Para cada resposta da IA:\n  - Envia sinal de digitando.\n  - Envia a mensagem.\n  - Aguarda 3 segundos.\n- Finalização: Após o loop, o fluxo é encerrado.",
+        "height": 576,
+        "width": 1264,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2944,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "0f976e00-2421-41a2-a93d-bea107973a91",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        960,
+        576
+      ],
+      "id": "b6048692-c36c-4348-86db-6e60fd1e9195",
+      "name": "5 Segundos",
+      "webhookId": "fa6164d7-556a-4536-b1a7-3fc011c9267a"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 608,
+        "width": 1296,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2928,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "40cdd300-17fb-4de9-ab4d-f6923ec366c2",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 608,
+        "width": 608,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2304,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "34a5e4c2-9b43-4b29-9679-9ba243ef3f00",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Você é um assistente que formata respostas para WhatsApp. Receba um texto longo e divida-o em mensagens curtas, formatadas para WhatsApp, respeitando o conteúdo original.\n\nRegras:\n\n- Divida o texto em mensagens com até 400 caracteres, preferindo cortar em pontos naturais (fim de frase).\n- Formate o texto usando a sintaxe do WhatsApp para:\n  - Negrito com *asteriscos* (ex: *palavra*)\n  - Itálico com _underscores_ (ex: _palavra_)\n  - Tachado com ~til~ (ex: ~palavra~)\n- Preserve links no formato original (ex: https://...)\n- Não altere o conteúdo ou o significado original do texto.\n- Mantenha a mensagem fiel ao texto recebido.\n- Retorne somente um array JSON de strings com as mensagens formatadas, por exemplo: [\"Mensagem 1\", \"Mensagem 2\"].\n- Não inclua explicações ou texto extra."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        2560,
+        416
+      ],
+      "id": "eb3b8166-eff4-4b3c-8c06-7c5ebae80891",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "[\n  \"Olá! Tudo bem? Aqui está o que você pediu.\",\n  \"Primeiro, precisamos verificar seus dados.\",\n  \"Depois disso, podemos prosseguir com o atendimento.\",\n  \"Qualquer dúvida, estou por aqui!\"\n]"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2704,
+        624
+      ],
+      "id": "7adff266-d26d-4c8e-b32f-a2fdd59ed6d2",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "content": "## Fale comigo\n\n- Se precisa de qualquer ajuda, basta entrar em contato comigo através do link:\n\nhttps://chat.whatsapp.com/FagCpSh5ysz6dD0twsi747?mode=ems_copy_c",
+        "width": 576,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        16,
+        16
+      ],
+      "typeVersion": 1,
+      "id": "3f73c525-7fc6-44aa-a4d2-f5d2af11feb4",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f98d7660-f8ae-4ed3-9ec3-e96dc29aeac3",
+              "leftValue": "={{ $json.body.data.key.remoteJid }}",
+              "rightValue": "5519971002086@s.whatsapp.net",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "c06feda7-5473-4b69-b1cd-22c5d329ebc7",
+              "leftValue": "={{ $json[\"body\"][\"data\"][\"key\"][\"fromMe\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        96,
+        496
+      ],
+      "id": "d8b4edf9-af4e-4e71-9f68-76eb3b66519c",
+      "name": "Verificar remetente"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 192,
+        "width": 608,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "d41a87b1-17c9-40e1-a537-03abf0ec47e5",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "# [🎥 YOUTUBE](https://www.youtube.com/@digitalwar721) \n\n# [📲 INSTAGRAM](https://www.instagram.com/digitalwar721/)\n\n",
+        "height": 176,
+        "width": 520,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        624,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "32403138-e147-4981-96c0-060c1310578f",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1824,
+        608
+      ],
+      "id": "66374562-8d78-4442-8547-e7694adb0e84",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "H0SfTLZWyuQ8zuP6",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2544,
+        624
+      ],
+      "id": "8182318d-465b-44a4-9cc4-5bab4d8e8bc0",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "H0SfTLZWyuQ8zuP6",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.floor(Math.random() * 3) + 2 }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3920,
+        432
+      ],
+      "id": "643a826d-ea65-4fc4-a1ff-82b9ee159b60",
+      "name": "Aguardar1",
+      "webhookId": "e0689fc6-acc1-4c26-b617-6aff22b97d6a"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Webhook').first().json.body.instance }}",
+        "remoteJid": "={{ $('Normalização').item.json.message.from }}",
+        "messageText": "={{ $('Loop Mensagens1').item.json.output }}",
+        "options_message": {
+          "linkPreview": false
+        }
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        3728,
+        432
+      ],
+      "id": "6520d118-265c-4e29-a07a-195e8ec8857d",
+      "name": "Enviar Mensagem1",
+      "credentials": {
+        "evolutionApi": {
+          "id": "TqsJKurKCQcuLkQq",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "chat-api",
+        "operation": "send-presence",
+        "instanceName": "={{ $('Webhook').first().json.body.instance }}",
+        "remoteJid": "={{ $('Normalização').item.json.message.from }}",
+        "delay": 2000
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        3536,
+        432
+      ],
+      "id": "8598161e-4854-4499-b72e-9abe8864b817",
+      "name": "Digitando...1",
+      "credentials": {
+        "evolutionApi": {
+          "id": "TqsJKurKCQcuLkQq",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        3264,
+        416
+      ],
+      "id": "f838a227-04d2-469e-b964-bb07a2f7e157",
+      "name": "Loop Mensagens1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Verificar remetente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalização": {
+      "main": [
+        [
+          {
+            "node": "Publicar Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publicar Mensagem": {
+      "main": [
+        [
+          {
+            "node": "Obter Mensagens",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "5 Segundos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obter Mensagens": {
+      "main": [
+        [
+          {
+            "node": "Verificar se usuário parou de digitar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente Blue",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Mensagens1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Blue": {
+      "main": [
+        [
+          {
+            "node": "Delete Buffer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Juntar Mensagens": {
+      "main": [
+        [
+          {
+            "node": "Agente Blue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Buffer": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar se usuário parou de digitar": {
+      "main": [
+        [
+          {
+            "node": "Juntar Mensagens",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Usuário ainda está digitando, parar o fluxo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar remetente": {
+      "main": [
+        [
+          {
+            "node": "Normalização",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Blue",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aguardar1": {
+      "main": [
+        [
+          {
+            "node": "Loop Mensagens1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Mensagem1": {
+      "main": [
+        [
+          {
+            "node": "Aguardar1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Digitando...1": {
+      "main": [
+        [
+          {
+            "node": "Enviar Mensagem1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Mensagens1": {
+      "main": [
+        [
+          {
+            "node": "Encerrar envio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Digitando...1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7cd224f7-c6bf-4428-846b-6102c071465a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0d89128b5ccdde9eed3bd6ddbe4e14b7f821add554b4dd507f8fd8e6c0adf9b6"
+  },
+  "id": "6XAHIKAr7qCNPqBF",
+  "tags": []
+}
